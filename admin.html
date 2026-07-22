@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>站長中控台</title>
+    <title>DxS 站長中控台</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
@@ -14,123 +14,125 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
-<body class="text-slate-800 antialiased min-h-screen">
+<body class="text-slate-800 antialiased h-screen overflow-hidden flex flex-col">
 
     <!-- 登入畫面 -->
-    <div id="login-screen" class="flex items-center justify-center h-screen bg-slate-800 relative z-50">
+    <div id="login-screen" class="flex items-center justify-center h-screen bg-slate-800 absolute inset-0 z-50">
         <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center">
             <h2 class="text-2xl font-black mb-6 text-slate-700">🔒 站長後台登入</h2>
-            <input type="password" id="admin-pwd" placeholder="請輸入密碼" class="w-full mb-4 p-3 rounded-lg border border-slate-200 focus:outline-none focus:border-[#92A8D1] text-center tracking-widest text-lg">
+            <input type="password" id="admin-pwd" placeholder="請輸入雲端密碼" class="w-full mb-4 p-3 rounded-lg border border-slate-200 focus:outline-none focus:border-[#92A8D1] text-center tracking-widest text-lg">
             <button onclick="checkPwd()" class="w-full bg-[#92A8D1] hover:bg-[#7a93c2] text-white font-bold py-3 rounded-lg transition-colors shadow-md">進入中控台</button>
+            <p class="text-[11px] text-slate-400 mt-4">提示：初始預設密碼為 svtdxs（登入後可至全站設定修改）</p>
         </div>
     </div>
 
-    <div id="admin-panel" class="w-full h-screen hidden flex flex-col md:flex-row overflow-hidden bg-slate-100 absolute top-0 left-0">
+    <!-- 雙螢幕工作站面板 (預設隱藏) -->
+    <div id="admin-panel" class="w-full h-full hidden flex flex-col lg:flex-row overflow-hidden bg-slate-100">
         
-        <!-- 左側工作區 -->
-        <div class="w-full md:w-1/2 lg:w-5/12 p-4 md:p-6 overflow-y-auto h-full bg-white relative z-10 shadow-xl flex flex-col">
-            <div class="flex justify-between items-center mb-6 shrink-0">
-                <h1 class="text-2xl font-black text-slate-700">網站中控台</h1>
+        <!-- 左側：後台工作區 -->
+        <div class="w-full lg:w-1/2 p-4 md:p-6 overflow-y-auto h-full bg-white shadow-xl flex flex-col z-10">
+            <div class="flex justify-between items-center mb-4 shrink-0 border-b pb-3">
+                <h1 class="text-xl font-black text-slate-700">💎 網站中控台</h1>
+                <button onclick="location.reload()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded font-bold">登出鎖定</button>
             </div>
 
             <!-- 頁籤切換 -->
             <div class="flex gap-2 mb-6 border-b border-slate-100 pb-2 overflow-x-auto shrink-0">
-                <button onclick="switchTab('settings')" id="tab-settings" class="px-4 py-2 rounded-lg font-bold text-slate-400 hover:text-slate-700 transition-colors whitespace-nowrap">⚙️ 全站設定</button>
-                <button onclick="switchTab('songs')" id="tab-songs" class="px-4 py-2 rounded-lg font-bold bg-[#92A8D1]/10 text-[#92A8D1] transition-colors whitespace-nowrap">🎵 歌單管理</button>
-                <button onclick="switchTab('comments')" id="tab-comments" class="px-4 py-2 rounded-lg font-bold text-slate-400 hover:text-slate-700 transition-colors whitespace-nowrap">💬 留言管理</button>
+                <button onclick="switchTab('settings')" id="tab-settings" class="px-3 py-2 rounded-lg font-bold text-slate-400 hover:text-slate-700 transition-colors whitespace-nowrap text-sm">⚙️ 全站設定</button>
+                <button onclick="switchTab('songs')" id="tab-songs" class="px-3 py-2 rounded-lg font-bold bg-[#92A8D1]/10 text-[#92A8D1] transition-colors whitespace-nowrap text-sm">🎵 歌單管理</button>
+                <button onclick="switchTab('comments')" id="tab-comments" class="px-3 py-2 rounded-lg font-bold text-slate-400 hover:text-slate-700 transition-colors whitespace-nowrap text-sm">💬 留言審核</button>
             </div>
 
-            <!-- ================= Tab 1: 全站設定 ================= -->
-            <div id="panel-settings" class="hidden space-y-5 flex-grow">
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <label class="block text-sm font-bold text-slate-700 mb-2">1. 網站大標題</label>
-                    <input type="text" id="site-title" class="w-full p-3 rounded-lg border border-slate-200 focus:outline-none focus:border-[#92A8D1]" placeholder="例如: DxS [SERENADE] ON STAGE">
+            <!-- Tab 1: 全站設定 -->
+            <div id="panel-settings" class="hidden space-y-4 flex-grow pb-10">
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">1. 網站大標題</label>
+                    <input type="text" id="site-title" class="w-full p-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-[#92A8D1]" placeholder="例如: DxS [SERENADE]">
                 </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <label class="block text-sm font-bold text-slate-700 mb-2">2. 建立歌單分類 (請用半形逗號 , 隔開)</label>
-                    <input type="text" id="site-categories" class="w-full p-3 rounded-lg border border-slate-200 focus:outline-none focus:border-[#92A8D1]" placeholder="例如: DxS, SEUNGKWAN SOLO, ENCORE">
-                    <p class="text-xs text-red-500 mt-2 font-bold">💡 必填！設定好分類後，前台才會有畫面，新增歌曲時才能選擇放在哪個分類下喔！</p>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">2. 歌單分類 (半形逗號隔開)</label>
+                    <input type="text" id="site-categories" class="w-full p-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-[#92A8D1]" placeholder="DxS, SOLO, ENCORE">
                 </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <label class="block text-sm font-bold text-slate-700 mb-2">3. 自訂頂部公告區塊 (可貼 HTML 積木)</label>
-                    <textarea id="site-top-html" rows="4" class="w-full p-3 rounded-lg border border-slate-200 text-sm font-mono focus:outline-none focus:border-[#92A8D1]" placeholder="在此貼上注意事項或公告的 HTML"></textarea>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">3. 變更後台登入密碼</label>
+                    <input type="text" id="site-pwd-input" class="w-full p-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-[#92A8D1]" placeholder="輸入新密碼">
                 </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <label class="block text-sm font-bold text-slate-700 mb-2">4. 自訂底部資訊區塊 (可貼地圖、網址 HTML)</label>
-                    <textarea id="site-bottom-html" rows="4" class="w-full p-3 rounded-lg border border-slate-200 text-sm font-mono focus:outline-none focus:border-[#92A8D1]" placeholder="在此貼上交通資訊或社群連結的 HTML"></textarea>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">4. 頂部公告 HTML</label>
+                    <textarea id="site-top-html" rows="3" class="w-full p-2.5 rounded-lg border border-slate-200 text-xs font-mono focus:outline-none focus:border-[#92A8D1]"></textarea>
                 </div>
-                <button onclick="saveSettings()" class="w-full bg-[#92A8D1] hover:bg-[#7a93c2] text-white font-bold py-3 rounded-lg transition-colors shadow-md">儲存全站設定</button>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">5. 底部資訊 HTML</label>
+                    <textarea id="site-bottom-html" rows="3" class="w-full p-2.5 rounded-lg border border-slate-200 text-xs font-mono focus:outline-none focus:border-[#92A8D1]"></textarea>
+                </div>
+                <button onclick="saveSettings()" class="w-full bg-[#92A8D1] hover:bg-[#7a93c2] text-white font-bold py-2.5 rounded-lg transition-colors shadow-sm text-sm">儲存全站設定</button>
             </div>
 
-            <!-- ================= Tab 2: 歌曲管理 ================= -->
+            <!-- Tab 2: 歌曲管理 -->
             <div id="panel-songs" class="block flex-grow pb-10">
-                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 mb-8 shadow-inner">
-                    <h3 class="font-bold mb-4 flex items-center gap-2 text-slate-700">✨ 新增 / 編輯歌曲</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 shadow-inner">
+                    <h3 class="font-bold mb-3 text-xs text-slate-700 uppercase tracking-wider">✨ 新增 / 編輯歌曲</h3>
+                    <div class="grid grid-cols-2 gap-3 mb-3">
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1">歌曲名稱</label>
-                            <input type="text" id="input-title" class="w-full p-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-[#92A8D1]" placeholder="例如: Blue">
+                            <label class="block text-[11px] font-bold text-slate-500 mb-1">歌曲名稱 (對應首頁歌名)</label>
+                            <input type="text" id="input-title" class="w-full p-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:border-[#92A8D1]" placeholder="例如: Blue">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1">所屬分類</label>
-                            <select id="input-category" class="w-full p-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-[#92A8D1]"></select>
+                            <label class="block text-[11px] font-bold text-slate-500 mb-1">所屬分類</label>
+                            <select id="input-category" class="w-full p-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:border-[#92A8D1]"></select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1">YouTube 影片 ID</label>
-                            <input type="text" id="input-video" class="w-full p-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-[#92A8D1]" placeholder="例如: dQw4w9WgXcQ">
+                            <label class="block text-[11px] font-bold text-slate-500 mb-1">YouTube 影片 ID</label>
+                            <input type="text" id="input-video" class="w-full p-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:border-[#92A8D1]" placeholder="例如: dZNPbNkKAss">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1">影片開始秒數</label>
-                            <input type="number" id="input-start" class="w-full p-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-[#92A8D1]" placeholder="例如: 0">
+                            <label class="block text-[11px] font-bold text-slate-500 mb-1">開始秒數</label>
+                            <input type="number" id="input-start" class="w-full p-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:border-[#92A8D1]" placeholder="0">
                         </div>
                     </div>
                     
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <div class="flex justify-between items-end mb-1">
-                            <label class="block text-xs font-bold text-slate-500">歌詞與應援詞</label>
-                            <label class="cursor-pointer bg-[#92A8D1]/10 hover:bg-[#92A8D1]/20 text-[#92A8D1] font-bold text-xs px-3 py-1.5 rounded transition-colors shadow-sm">
-                                📁 點選匯入 .txt (可多選)
+                            <label class="block text-[11px] font-bold text-slate-500">歌詞與應援詞</label>
+                            <label class="cursor-pointer bg-[#92A8D1]/10 hover:bg-[#92A8D1]/20 text-[#92A8D1] font-bold text-[10px] px-2 py-1 rounded transition-colors shadow-sm">
+                                📁 點選或拖曳匯入多份 .txt
                                 <input type="file" id="input-file" accept=".txt" multiple class="hidden" onchange="window.handleFile(event)">
                             </label>
                         </div>
-                        <textarea id="input-lyrics" rows="8" class="w-full border-2 border-dashed border-slate-300 p-3 rounded-lg font-mono text-sm transition-colors focus:outline-none focus:border-[#92A8D1]" placeholder="直接貼上歌詞，或將 .txt 檔案拖曳進來..."></textarea>
+                        <textarea id="input-lyrics" rows="6" class="w-full border-2 border-dashed border-slate-300 p-2.5 rounded-lg font-mono text-xs transition-colors focus:outline-none focus:border-[#92A8D1]" placeholder="貼上歌詞，或將 .txt 檔案拖曳至此..."></textarea>
                     </div>
                     
                     <div class="flex gap-2">
-                        <button onclick="saveSong()" class="flex-1 bg-[#92A8D1] hover:bg-[#7a93c2] text-white font-bold py-2.5 rounded-lg transition-colors shadow-sm">儲存並發布</button>
-                        <button onclick="clearForm()" class="px-4 bg-white border border-slate-300 text-slate-600 font-bold py-2.5 rounded-lg hover:bg-slate-50 transition-colors">清除重填</button>
+                        <button onclick="saveSong()" class="flex-1 bg-[#92A8D1] hover:bg-[#7a93c2] text-white font-bold py-2 rounded-lg transition-colors shadow-sm text-xs">儲存並發布</button>
+                        <button onclick="clearForm()" class="px-3 bg-white border border-slate-300 text-slate-600 font-bold py-2 rounded-lg hover:bg-slate-50 transition-colors text-xs">清除</button>
                     </div>
                 </div>
 
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <h3 class="font-bold mb-4 text-slate-700 flex justify-between items-center">
-                        <span>📋 已上架歌曲列表</span>
-                        <span class="text-xs font-normal text-slate-400 bg-slate-100 px-2 py-1 rounded">上下拖曳可直接排序</span>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold mb-3 text-xs text-slate-700 flex justify-between items-center">
+                        <span>📋 已上架清單 (上下拖曳排序)</span>
                     </h3>
                     <div id="admin-song-list" class="space-y-2"></div>
                 </div>
             </div>
 
-            <!-- ================= Tab 3: 留言管理 ================= -->
+            <!-- Tab 3: 留言管理 -->
             <div id="panel-comments" class="hidden flex-grow">
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                    <h3 class="font-bold mb-4 flex justify-between items-center text-slate-700">
-                        <span>💬 粉絲留言審核區</span>
-                    </h3>
-                    <div id="admin-comments-list" class="space-y-3"></div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold mb-3 text-xs text-slate-700">💬 粉絲留言審核區</h3>
+                    <div id="admin-comments-list" class="space-y-2"></div>
                 </div>
             </div>
-
         </div>
 
-        <!-- 右側即時預覽區 -->
-        <div class="hidden md:flex md:w-1/2 lg:w-7/12 bg-slate-900 flex-col h-full relative z-0">
-            <div class="bg-slate-800 text-slate-300 text-xs px-4 py-3 flex justify-between items-center border-b border-slate-700 shadow-sm">
+        <!-- 右側：即時預覽工作站 (Live Preview) -->
+        <div class="hidden lg:flex lg:w-1/2 bg-slate-900 flex-col h-full relative z-0 border-l border-slate-700">
+            <div class="bg-slate-800 text-slate-300 text-[11px] px-4 py-2.5 flex justify-between items-center border-b border-slate-700">
                 <div class="flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-                    <span>前台即時預覽 (資料儲存後自動更新)</span>
+                    <span>前台即時預覽 (儲存後自動同步)</span>
                 </div>
-                <button onclick="document.getElementById('preview-frame').src='index.html'" class="hover:text-white px-3 py-1 rounded border border-slate-600 bg-slate-700 transition-colors">🔄 手動重新載入</button>
+                <button onclick="document.getElementById('preview-frame').src='index.html'" class="hover:text-white px-2.5 py-1 rounded border border-slate-600 bg-slate-700 text-[10px]">重新整理</button>
             </div>
             <iframe id="preview-frame" src="index.html" class="w-full flex-grow border-none bg-white"></iframe>
         </div>
@@ -138,7 +140,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, setDoc, addDoc, deleteDoc, query, orderBy, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, addDoc, deleteDoc, query, orderBy, writeBatch, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
         // ⚠️ 請把你的 Firebase Config 貼在這裡取代！
@@ -157,7 +159,7 @@
 
         window.showToast = function(msg, isError = false) {
             const box = document.createElement('div');
-            box.className = `fixed top-10 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-full shadow-2xl z-[9999] transition-all duration-300 font-bold text-sm ${isError ? 'bg-red-500 text-white' : 'bg-slate-800 text-white'}`;
+            box.className = `fixed top-10 left-1/2 transform -translate-x-1/2 px-5 py-2.5 rounded-full shadow-2xl z-[9999] transition-all duration-300 font-bold text-xs ${isError ? 'bg-red-500 text-white' : 'bg-slate-800 text-white'}`;
             box.style.opacity = '0';
             box.style.transform = 'translate(-50%, -20px)';
             box.innerText = msg;
@@ -174,10 +176,15 @@
                 appDb = getFirestore(app);
                 
                 // 去資料庫抓取設定
-                const docSnap = await getDoc(doc(appDb, "settings", "global"));
+                const docRef = doc(appDb, "settings", "global");
+                const docSnap = await getDoc(docRef);
+                
                 let correctPwd = "svtdxs"; // 預設初始密碼
                 if (docSnap.exists() && docSnap.data().adminPassword) {
                     correctPwd = docSnap.data().adminPassword;
+                } else {
+                    // 如果資料庫還沒有設定檔，先自動幫建立預設密碼
+                    await setDoc(docRef, { adminPassword: "svtdxs", categories: ["DxS", "SOLO", "ENCORE"] }, { merge: true });
                 }
 
                 if (inputPwd === correctPwd) {
@@ -189,58 +196,53 @@
                     showToast('❌ 密碼錯誤！', true);
                 }
             } catch (e) {
-                showToast('❌ 連線資料庫失敗，請檢查 Config 設定', true);
+                console.error(e);
+                showToast('❌ 連線資料庫失敗，請檢查 Config 設定或網路', true);
             }
         }
 
-        function initFirebase() {
-            try {
-                const app = initializeApp(firebaseConfig);
-                appDb = getFirestore(app);
-                showToast('✅ 成功連線至資料庫！');
+        function initFirebaseListeners() {
+            // 載入設定
+            onSnapshot(doc(appDb, "settings", "global"), (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    document.getElementById('site-title').value = data.title || "";
+                    document.getElementById('site-categories').value = data.categories ? data.categories.join(', ') : "";
+                    document.getElementById('site-pwd-input').value = data.adminPassword || "svtdxs";
+                    document.getElementById('site-top-html').value = data.topHtml || "";
+                    document.getElementById('site-bottom-html').value = data.bottomHtml || "";
+                    updateCategorySelect(data.categories || []);
+                }
+            });
 
-                // 載入設定
-                onSnapshot(doc(appDb, "settings", "global"), (docSnap) => {
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        document.getElementById('site-title').value = data.title || "";
-                        document.getElementById('site-categories').value = data.categories ? data.categories.join(', ') : "";
-                        document.getElementById('site-top-html').value = data.topHtml || "";
-                        document.getElementById('site-bottom-html').value = data.bottomHtml || "";
-                        updateCategorySelect(data.categories || []);
-                    }
-                });
+            // 載入歌曲
+            const q = query(collection(appDb, "songs"), orderBy("order", "asc"));
+            onSnapshot(q, (snapshot) => {
+                songsData = [];
+                snapshot.forEach((doc) => songsData.push({ id: doc.id, ...doc.data() }));
+                renderSongList();
+            });
 
-                // 載入歌曲
-                const q = query(collection(appDb, "songs"), orderBy("order", "asc"));
-                onSnapshot(q, (snapshot) => {
-                    songsData = [];
-                    snapshot.forEach((doc) => songsData.push({ id: doc.id, ...doc.data() }));
-                    renderSongList();
-                });
-
-                // 載入留言
-                const cq = query(collection(appDb, "comments"), orderBy("createdAt", "desc"));
-                onSnapshot(cq, (snapshot) => {
-                    const list = document.getElementById('admin-comments-list');
-                    list.innerHTML = '';
-                    snapshot.forEach((docSnap) => {
-                        const data = docSnap.data();
-                        const date = data.createdAt ? new Date(data.createdAt.toMillis()).toLocaleString('zh-TW') : '未知時間';
-                        list.innerHTML += `
-                            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 flex justify-between items-start gap-4">
-                                <div>
-                                    <div class="text-xs text-slate-400 mb-1">${date} • <span class="font-bold text-slate-600">${data.name}</span></div>
-                                    <div class="text-sm text-slate-700">${data.text}</div>
-                                </div>
-                                <button onclick="deleteComment('${docSnap.id}')" class="text-red-400 hover:text-red-600 text-xs whitespace-nowrap px-2 py-1 bg-white border border-red-100 rounded shadow-sm">🗑️ 刪除</button>
+            // 載入留言
+            const cq = query(collection(appDb, "comments"), orderBy("createdAt", "desc"));
+            onSnapshot(cq, (snapshot) => {
+                const list = document.getElementById('admin-comments-list');
+                list.innerHTML = '';
+                snapshot.empty ? list.innerHTML = '<div class="text-xs text-slate-400 text-center py-4">目前尚無留言</div>' : null;
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const date = data.createdAt ? new Date(data.createdAt.toMillis()).toLocaleString('zh-TW', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'}) : '';
+                    list.innerHTML += `
+                        <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100 flex justify-between items-start gap-3">
+                            <div>
+                                <div class="text-[10px] text-slate-400 mb-0.5">${date} • <span class="font-bold text-slate-600">${data.name}</span></div>
+                                <div class="text-xs text-slate-700">${data.text}</div>
                             </div>
-                        `;
-                    });
+                            <button onclick="deleteComment('${docSnap.id}')" class="text-red-400 hover:text-red-600 text-[10px] px-2 py-1 bg-white border border-red-100 rounded shadow-sm shrink-0">刪除</button>
+                        </div>
+                    `;
                 });
-            } catch (e) {
-                showToast('❌ 資料庫連線失敗', true);
-            }
+            });
         }
 
         window.switchTab = function(tab) {
@@ -267,26 +269,22 @@
         window.saveSettings = async function() {
             const title = document.getElementById('site-title').value;
             const categories = document.getElementById('site-categories').value.split(',').map(s => s.trim()).filter(s => s);
+            const adminPassword = document.getElementById('site-pwd-input').value.trim() || "svtdxs";
             const topHtml = document.getElementById('site-top-html').value;
             const bottomHtml = document.getElementById('site-bottom-html').value;
             
-            if (categories.length === 0) {
-                return showToast('❌ 請至少輸入一個分類！', true);
-            }
+            if (categories.length === 0) return showToast('❌ 請至少輸入一個分類！', true);
 
             await setDoc(doc(appDb, "settings", "global"), {
-                title: title,
-                categories: categories,
-                topHtml: topHtml,
-                bottomHtml: bottomHtml
+                title, categories, adminPassword, topHtml, bottomHtml
             }, { merge: true });
             
-            showToast('✅ 全站設定已儲存！前台已同步更新');
+            showToast('✅ 全站設定與密碼已更新！');
             refreshPreview();
         }
 
+        // 檔案拖曳與批次上傳
         window.handleFile = async function(e) { await processFiles(Array.from(e.target.files)); e.target.value = ''; }
-
         const lyricsArea = document.getElementById('input-lyrics');
         lyricsArea.addEventListener('dragover', (e) => { e.preventDefault(); lyricsArea.classList.add('border-[#92A8D1]', 'bg-blue-50'); });
         lyricsArea.addEventListener('dragleave', (e) => { e.preventDefault(); lyricsArea.classList.remove('border-[#92A8D1]', 'bg-blue-50'); });
@@ -302,7 +300,7 @@
                 reader.onload = (event) => { document.getElementById('input-lyrics').value = event.target.result; showToast('📄 成功載入單一歌詞！'); };
                 reader.readAsText(files[0]);
             } else if (files.length > 1) {
-                showToast('⏳ 批次匯入中...', false);
+                showToast(`⏳ 正在批次匯入 ${files.length} 份檔案...`, false);
                 const batch = writeBatch(appDb);
                 let defaultCategory = document.getElementById('input-category').value || '未分類';
                 for (let file of files) {
@@ -319,13 +317,13 @@
             const title = document.getElementById('input-title').value.trim();
             if (!title) return showToast('❌ 請輸入歌曲名稱', true);
             const songData = {
-                title: title, category: document.getElementById('input-category').value,
+                title, category: document.getElementById('input-category').value,
                 videoId: document.getElementById('input-video').value.trim(), startTime: parseInt(document.getElementById('input-start').value) || 0,
                 lyrics: document.getElementById('input-lyrics').value
             };
             try {
-                if (currentEditingId) { await setDoc(doc(appDb, "songs", currentEditingId), songData, { merge: true }); showToast('✅ 更新成功！'); } 
-                else { songData.order = 99; await addDoc(collection(appDb, "songs"), songData); showToast('✅ 新增成功！'); }
+                if (currentEditingId) { await setDoc(doc(appDb, "songs", currentEditingId), songData, { merge: true }); showToast('✅ 歌曲更新成功！'); } 
+                else { songData.order = 99; await addDoc(collection(appDb, "songs"), songData); showToast('✅ 新增歌曲成功！'); }
                 clearForm(); refreshPreview();
             } catch (e) { showToast('❌ 儲存失敗', true); }
         }
@@ -337,10 +335,10 @@
             document.getElementById('input-title').value = song.title; document.getElementById('input-category').value = song.category;
             document.getElementById('input-video').value = song.videoId; document.getElementById('input-start').value = song.startTime || 0;
             document.getElementById('input-lyrics').value = song.lyrics;
-            switchTab('songs'); document.querySelector('.overflow-y-auto').scrollTo({ top: 0, behavior: 'smooth' }); showToast('✏️ 進入編輯模式');
+            switchTab('songs'); showToast('✏️ 進入編輯模式');
         }
 
-        window.deleteSong = async function(id) { if(confirm('確定刪除？')) { await deleteDoc(doc(appDb, "songs", id)); showToast('🗑️ 已刪除'); refreshPreview(); } }
+        window.deleteSong = async function(id) { if(confirm('確定要刪得這首歌嗎？')) { await deleteDoc(doc(appDb, "songs", id)); showToast('🗑️ 已刪除'); refreshPreview(); } }
         window.clearForm = function() { currentEditingId = null; ['input-title', 'input-video', 'input-start', 'input-lyrics'].forEach(id => document.getElementById(id).value = ''); }
         window.deleteComment = async function(id) { if(confirm('刪除這則留言？')) { await deleteDoc(doc(appDb, "comments", id)); showToast('🗑️ 留言已刪除'); refreshPreview(); } }
 
@@ -349,15 +347,15 @@
             list.innerHTML = '';
             songsData.forEach(song => {
                 list.innerHTML += `
-                    <div data-id="${song.id}" class="bg-white border border-slate-200 p-3 rounded-lg flex items-center justify-between shadow-sm group">
-                        <div class="flex items-center gap-3 overflow-hidden">
-                            <span class="drag-handle cursor-grab text-slate-400 px-1 py-2 active:cursor-grabbing text-lg" title="拖曳排序">☰</span>
-                            <span class="text-[10px] font-bold text-[#92A8D1] bg-[#92A8D1]/10 px-2 py-1 rounded whitespace-nowrap">${song.category}</span>
-                            <span class="font-bold text-slate-700 truncate">${song.title}</span>
+                    <div data-id="${song.id}" class="bg-white border border-slate-200 p-2.5 rounded-lg flex items-center justify-between shadow-sm group">
+                        <div class="flex items-center gap-2 overflow-hidden">
+                            <span class="drag-handle cursor-grab text-slate-300 px-1 text-sm">☰</span>
+                            <span class="text-[9px] font-bold text-[#92A8D1] bg-[#92A8D1]/10 px-1.5 py-0.5 rounded whitespace-nowrap">${song.category}</span>
+                            <span class="font-bold text-slate-700 text-xs truncate">${song.title}</span>
                         </div>
-                        <div class="flex gap-2 shrink-0">
-                            <button onclick="editSong('${song.id}')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded font-bold">編輯</button>
-                            <button onclick="deleteSong('${song.id}')" class="text-xs bg-red-50 hover:bg-red-100 text-red-500 px-3 py-1.5 rounded font-bold">刪除</button>
+                        <div class="flex gap-1 shrink-0">
+                            <button onclick="editSong('${song.id}')" class="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-1 rounded font-bold">編輯</button>
+                            <button onclick="deleteSong('${song.id}')" class="text-[10px] bg-red-50 hover:bg-red-100 text-red-500 px-2 py-1 rounded font-bold">刪除</button>
                         </div>
                     </div>
                 `;
@@ -366,7 +364,7 @@
             new Sortable(list, {
                 handle: '.drag-handle', animation: 150, ghostClass: 'bg-blue-50',
                 onEnd: async function () {
-                    showToast('🔄 儲存排序中...', false);
+                    showToast('🔄 正在背景自動儲存新排序...', false);
                     const items = list.querySelectorAll('[data-id]');
                     const batch = writeBatch(appDb);
                     items.forEach((item, index) => batch.update(doc(appDb, "songs", item.getAttribute('data-id')), { order: index + 1 }));
