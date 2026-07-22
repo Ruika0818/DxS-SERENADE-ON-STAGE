@@ -80,8 +80,17 @@
                 <!-- 右側：歌詞與留言區 -->
                 <div class="w-full lg:w-7/12 space-y-6">
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-10">
-                        <h3 class="text-slate-400 font-bold mb-6 border-b pb-2 text-sm flex items-center gap-2">🎤 應援歌詞</h3>
-                        <div id="detail-lyrics" class="text-lg leading-[2.5] whitespace-pre-wrap font-medium text-center"></div>
+                        <!-- 歌詞標題與字體大小調整工具列 -->
+                        <div class="flex justify-between items-center mb-6 border-b pb-3">
+                            <h3 class="text-slate-700 font-bold text-sm flex items-center gap-2">🎤 應援歌詞</h3>
+                            <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg">
+                                <span class="text-[11px] text-slate-400 px-1 font-bold">字體</span>
+                                <button onclick="changeFontSize(-1)" class="w-7 h-7 bg-white hover:bg-slate-200 text-slate-700 rounded font-bold shadow-xs transition-colors text-xs">A-</button>
+                                <button onclick="resetFontSize()" class="w-7 h-7 bg-white hover:bg-slate-200 text-slate-700 rounded font-bold shadow-xs transition-colors text-[10px]">預設</button>
+                                <button onclick="changeFontSize(1)" class="w-7 h-7 bg-white hover:bg-slate-200 text-slate-700 rounded font-bold shadow-xs transition-colors text-xs">A+</button>
+                            </div>
+                        </div>
+                        <div id="detail-lyrics" class="leading-[2.5] whitespace-pre-wrap font-medium text-center transition-all duration-200" style="font-size: 1.15rem;"></div>
                     </div>
 
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8">
@@ -119,6 +128,19 @@
 
         let appDb, siteSettings = { title: "載入中...", categories: [] }, songsData = [], currentSongId = null, unsubscribeComments = null;
 
+        // 字體大小控制變數
+        let currentFontSize = 1.15; // rem
+        window.changeFontSize = function(direction) {
+            currentFontSize += direction * 0.15;
+            if (currentFontSize < 0.85) currentFontSize = 0.85;
+            if (currentFontSize > 2.2) currentFontSize = 2.2;
+            document.getElementById('detail-lyrics').style.fontSize = currentFontSize + 'rem';
+        }
+        window.resetFontSize = function() {
+            currentFontSize = 1.15;
+            document.getElementById('detail-lyrics').style.fontSize = currentFontSize + 'rem';
+        }
+
         window.showMessage = function(msg) {
             const box = document.createElement('div');
             box.className = 'fixed top-10 left-1/2 transform -translate-x-1/2 bg-[#333] text-white px-6 py-3 rounded-full shadow-xl z-[9999] opacity-0 transition-opacity duration-300';
@@ -138,7 +160,6 @@
                     siteSettings = docSnap.data();
                     updateSiteSettings();
                 } else {
-                    // 若資料庫還沒有設定，顯示提示
                     document.getElementById('loading').innerHTML = '⚠️ 站長尚未在後台初始化網站設定！請先至後台進行「全站設定」。';
                 }
             });
