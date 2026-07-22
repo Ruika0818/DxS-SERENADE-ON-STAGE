@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SEVENTEEN DXS 專屬應援站</title>
+    <title>DxS [SERENADE] ON STAGE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -16,24 +16,59 @@
 
     <header class="svt-gradient text-white shadow-md sticky top-0 z-50">
         <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-black tracking-wider">💎 SVT DXS CHEER</h1>
+            <h1 class="text-2xl font-black tracking-wider">💎DxS [SERENADE] ON STAGE</h1>
         </div>
     </header>
 
     <main class="flex-grow max-w-4xl mx-auto w-full p-4">
-        <!-- 列表畫面 -->
+        <!-- 列表畫面 (首頁) -->
         <section id="view-list" class="block">
-            <div class="text-center py-10">
-                <h2 class="text-3xl font-black mb-2 svt-text">演唱會應援教學</h2>
-                <p class="text-slate-500">點擊下方歌曲，開始練習應援吧！</p>
+            
+            <!-- 👇 【積木區 1：頂部公告欄】你可以自由修改或複製這塊 👇 -->
+            <div class="bg-blue-50 border border-blue-100 rounded-xl p-5 mb-8 shadow-sm">
+                <h3 class="text-blue-800 font-bold mb-2 flex items-center gap-2">
+                    📢 演唱會應援注意事項
+                </h3>
+                <ul class="text-sm text-blue-700 space-y-1 list-disc list-inside">
+                    <li>請遵守現場工作人員指示</li>
+                    <li>應援時請勿將手幅舉高過頭，以免擋到後方克拉</li>
+                    <li>場外應援物發放時間：15:00 於南大門 (發完為止)</li>
+                </ul>
             </div>
-            <div id="loading" class="text-center text-slate-400 py-10">載入中，請稍候...</div>
-            <div id="song-list-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden"></div>
+            <!-- 👆 頂部公告欄結束 👆 -->
+
+            <div class="text-center py-4 mb-6">
+                <h2 class="text-3xl font-black mb-2 svt-text">DxS [SERENADE] ON STAGE</h2>
+                <p class="text-slate-500 text-sm">點擊帶有標籤的歌曲，開始練習應援！</p>
+            </div>
+            
+            <div id="loading" class="text-center text-slate-400 py-10 flex flex-col items-center">
+                <svg class="animate-spin h-8 w-8 text-[#92A8D1] mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                正在載入應援資料...
+            </div>
+            
+            <!-- 這是原本自動生成歌單的容器 (請保留這行不動) -->
+            <div id="song-list-container" class="hidden flex flex-col gap-6 pb-6"></div>
+
+            <!-- 👇 【積木區 2：底部自訂區】你可以放圖片、交通資訊等 👇 -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 mt-4 mb-10">
+                <h3 class="text-slate-800 font-bold mb-3 border-b pb-2">🗺️ 場館與交通資訊</h3>
+                <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                    這裡可以自由輸入你想告訴粉絲的資訊，例如交通方式、場館地圖。<br>
+                    如果要放圖片，可以直接使用下方的 img 標籤放入圖片網址。
+                </p>
+                <!-- 圖片範例 (可將 src 換成你要的圖片網址) -->
+                <img src="https://placehold.co/600x300/F7CAC9/ffffff?text=Map+Placeholder" alt="地圖" class="w-full rounded-lg shadow-sm">
+            </div>
+            <!-- 👆 底部自訂區結束 👆 -->
+
         </section>
 
-        <!-- 單曲畫面 -->
-        <section id="view-detail" class="hidden">
-            <button onclick="navigate('list')" class="mb-4 text-[#92A8D1] font-bold flex items-center">← 返回列表</button>
+        <!-- 單曲畫面 (影片與歌詞) -->
+        <section id="view-detail" class="hidden pb-20">
+            <button onclick="navigate('list')" class="mb-4 text-[#92A8D1] font-bold flex items-center bg-white px-4 py-2 rounded-full shadow-sm hover:bg-slate-50 transition-colors">
+                ← 返回總歌單
+            </button>
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 relative">
                 <!-- 影片固定在上方 -->
                 <div class="sticky top-[60px] z-40 bg-white shadow-sm border-b border-slate-100 rounded-t-2xl overflow-hidden">
@@ -41,8 +76,8 @@
                         <iframe id="detail-video" class="absolute top-0 left-0 w-full h-full" src="" frameborder="0" allowfullscreen></iframe>
                     </div>
                 </div>
-                <div class="p-6">
-                    <h2 id="detail-title" class="text-2xl font-black mb-6 border-b pb-4 text-center"></h2>
+                <div class="p-4 md:p-8">
+                    <h2 id="detail-title" class="text-2xl font-black mb-6 border-b pb-4 text-center text-slate-800"></h2>
                     <div id="detail-lyrics" class="text-lg leading-loose whitespace-pre-wrap font-medium text-center"></div>
                 </div>
             </div>
@@ -65,7 +100,41 @@
             messagingSenderId: "56387976084",
             appId: "1:56387976084:web:e7024f58ceaf038ecb2d81"
         };
-        // ==========================================
+      // ==========================================
+
+        // 演唱會完整歌單結構 (已幫你建置好)
+        const concertSetlist = [
+            {
+                category: "DxS [SERENADE] ON STAGE",
+                songs: ["Blue", "Silence", "Habit", "Guilty Pleasure", "Good to Me + Ready to love"]
+            },
+            {
+                category: "SEUNGKWAN SOLO",
+                songs: ["Dandelion", "Dream Serenade", "Time Lapse - TAEYEON (SK cover)"]
+            },
+            {
+                category: "DK SOLO",
+                songs: ["A Journey - Wonpil (DK cover)", "Go!", "Rockstar"]
+            },
+            {
+                category: "Blue MV Parody",
+                songs: ["Die with a Smile (cover by DxS)"]
+            },
+            {
+                category: "Music Talk Show",
+                songs: [
+                    "Go! + Go (Reverse)", "Best Scene (by DK)", "Drawing Our Moments - TAEYEON (SK cover)",
+                    "Sequel - LUCY (DK cover)", "Age - Yoon Jong Shin (SK cover)", "The Little Prince - Ryeowook (DK cover)",
+                    "Don’t Go - EXO (DxS cover)", "Doll - Lee Jee-hoon & Shin Hye-sung (DxS cover)",
+                    "Same dream, same mind, same night + Dust + Imperfect love + Cheers to youth",
+                    "탈진 - Choi Yu-ree’s unreleased song (DxS cover)", "Don’t Listen in Secret", "Say Yes", "Feel Me"
+                ]
+            },
+            {
+                category: "ENCORE",
+                songs: ["Prelude of love", "Fighting!", "VERY NICE", "Water", "Pretty women", "Echo!", "VERY NICE x N"]
+            }
+        ];
 
         // 初始化 Firebase
         let appDb, songsData = [];
@@ -73,7 +142,6 @@
             const app = initializeApp(firebaseConfig);
             appDb = getFirestore(app);
             
-            // 監聽資料庫變化
             const q = query(collection(appDb, "songs"), orderBy("createdAt", "desc"));
             onSnapshot(q, (snapshot) => {
                 songsData = [];
@@ -84,11 +152,11 @@
             document.getElementById('loading').innerText = '請先完成 Firebase 資料庫設定喔！';
         }
 
-        // 全域函數綁定
+        // 全域函數
         window.navigate = function(view, id = null) {
             document.getElementById('view-list').classList.add('hidden');
             document.getElementById('view-detail').classList.add('hidden');
-            document.getElementById('detail-video').src = ""; // 停止播放
+            document.getElementById('detail-video').src = ""; 
             
             document.getElementById(`view-${view}`).classList.remove('hidden');
             window.scrollTo(0, 0);
@@ -102,22 +170,77 @@
             container.classList.remove('hidden');
             container.innerHTML = '';
 
-            songsData.forEach(song => {
-                const thumbUrl = `https://img.youtube.com/vi/${song.videoId}/hqdefault.jpg`;
-                const card = document.createElement('div');
-                card.className = "bg-white rounded-2xl shadow-sm cursor-pointer border border-slate-100 overflow-hidden";
-                card.onclick = () => window.navigate('detail', song.id);
-                card.innerHTML = `
-                    <div class="h-40 overflow-hidden relative bg-slate-200">
-                        <img src="${thumbUrl}" class="w-full h-full object-cover">
-                    </div>
-                    <div class="p-4 flex justify-between items-center">
-                        <h3 class="font-bold text-lg text-slate-800">${song.title}</h3>
-                        <span class="text-xs bg-[#F7CAC9]/30 text-[#e87a78] px-2 py-1 rounded font-bold">應援教學</span>
-                    </div>
+            let globalIndex = 1;
+            const matchedIds = new Set(); // 記錄已經配對到的資料庫歌曲
+
+            // 渲染固定歌單
+            concertSetlist.forEach(section => {
+                let html = `
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-50 border-b border-slate-200 px-5 py-3 text-slate-700 font-black tracking-wider text-sm md:text-base">
+                            ${section.category}
+                        </div>
+                        <div class="divide-y divide-slate-100">
                 `;
-                container.appendChild(card);
+                
+                section.songs.forEach(songName => {
+                    // 去資料庫找找看有沒有名稱一模一樣的歌
+                    const dbSong = songsData.find(s => s.title.trim().toLowerCase() === songName.trim().toLowerCase());
+                    
+                    if (dbSong) {
+                        // 有應援教學 -> 亮起並可點擊
+                        matchedIds.add(dbSong.id);
+                        html += `
+                            <div onclick="window.navigate('detail', '${dbSong.id}')" class="px-5 py-3.5 flex items-center justify-between hover:bg-slate-50 cursor-pointer transition-colors group">
+                                <div class="flex items-center gap-3 md:gap-4">
+                                    <span class="text-[#92A8D1] font-mono font-bold w-6 text-right">${globalIndex}.</span>
+                                    <span class="font-bold text-slate-800 group-hover:text-[#92A8D1] transition-colors">${songName}</span>
+                                </div>
+                                <span class="text-[10px] md:text-xs bg-[#F7CAC9]/20 border border-[#F7CAC9] text-[#e87a78] px-2 py-1 rounded font-bold whitespace-nowrap shadow-sm">應援教學</span>
+                            </div>
+                        `;
+                    } else {
+                        // 沒有應援教學 -> 灰色純文字顯示
+                        html += `
+                            <div class="px-5 py-3.5 flex items-center justify-between opacity-40">
+                                <div class="flex items-center gap-3 md:gap-4">
+                                    <span class="text-slate-400 font-mono w-6 text-right">${globalIndex}.</span>
+                                    <span class="text-slate-600 font-medium">${songName}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    globalIndex++;
+                });
+                
+                html += `</div></div>`;
+                container.innerHTML += html;
             });
+
+            // 處理資料庫裡有，但不在上方固定歌單裡的歌 (防呆機制)
+            const unmatchedSongs = songsData.filter(s => !matchedIds.has(s.id));
+            if (unmatchedSongs.length > 0) {
+                let extraHtml = `
+                    <div class="bg-white rounded-xl shadow-sm border border-[#F7CAC9]/50 overflow-hidden mt-4">
+                        <div class="bg-[#F7CAC9]/10 border-b border-[#F7CAC9]/30 px-5 py-3 text-[#e87a78] font-black tracking-wider text-sm md:text-base">
+                            🎀 特別加碼 / 其他應援
+                        </div>
+                        <div class="divide-y divide-slate-100">
+                `;
+                unmatchedSongs.forEach(song => {
+                    extraHtml += `
+                        <div onclick="window.navigate('detail', '${song.id}')" class="px-5 py-3.5 flex items-center justify-between hover:bg-slate-50 cursor-pointer transition-colors group">
+                            <div class="flex items-center gap-3 md:gap-4">
+                                <span class="text-[#F7CAC9] font-mono font-bold w-6 text-right">★</span>
+                                <span class="font-bold text-slate-800">${song.title}</span>
+                            </div>
+                            <span class="text-[10px] md:text-xs bg-[#F7CAC9]/20 border border-[#F7CAC9] text-[#e87a78] px-2 py-1 rounded font-bold whitespace-nowrap shadow-sm">應援教學</span>
+                        </div>
+                    `;
+                });
+                extraHtml += `</div></div>`;
+                container.innerHTML += extraHtml;
+            }
         }
 
         function renderDetail(id) {
@@ -130,8 +253,11 @@
             
             // 處理歌詞顏色 (先處理大括號翻譯，再處理中括號應援)
             let safeText = song.lyrics.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            safeText = safeText.replace(/\{([^{}]+)\}/g, '<span class="text-[#92A8D1] font-bold text-[0.95em] mx-1 block md:inline bg-[#92A8D1]/10 px-2 py-0.5 rounded-md">$1</span>');
+            
+            // 修正順序：先處理中括號(應援)，再處理大括號(翻譯)，避免 HTML 標籤衝突
             safeText = safeText.replace(/\[([^\[\]]+)\]/g, '<span class="text-[#E91E63] font-black text-xl md:text-2xl mx-1 block md:inline">$1</span>');
+            safeText = safeText.replace(/\{([^{}]+)\}/g, '<span class="text-[#92A8D1] font-bold text-[0.95em] mx-1 block md:inline bg-[#92A8D1]/10 px-2 py-0.5 rounded-md">$1</span>');
+            
             document.getElementById('detail-lyrics').innerHTML = safeText;
         }
     </script>
