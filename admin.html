@@ -166,13 +166,30 @@
             setTimeout(() => { box.style.opacity = '0'; box.style.transform = 'translate(-50%, -20px)'; setTimeout(() => box.remove(), 300); }, 3000);
         }
 
-        window.checkPwd = function() {
-            if (document.getElementById('admin-pwd').value === 'svtdxs') {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('admin-panel').classList.remove('hidden');
-                initFirebase();
-            } else {
-                showToast('❌ 密碼錯誤！', true);
+        // 雲端密碼驗證
+        window.checkPwd = async function() {
+            const inputPwd = document.getElementById('admin-pwd').value;
+            try {
+                const app = initializeApp(firebaseConfig);
+                appDb = getFirestore(app);
+                
+                // 去資料庫抓取設定
+                const docSnap = await getDoc(doc(appDb, "settings", "global"));
+                let correctPwd = "svtdxs"; // 預設初始密碼
+                if (docSnap.exists() && docSnap.data().adminPassword) {
+                    correctPwd = docSnap.data().adminPassword;
+                }
+
+                if (inputPwd === correctPwd) {
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('admin-panel').classList.remove('hidden');
+                    initFirebaseListeners();
+                    showToast('✅ 成功登入中控台！');
+                } else {
+                    showToast('❌ 密碼錯誤！', true);
+                }
+            } catch (e) {
+                showToast('❌ 連線資料庫失敗，請檢查 Config 設定', true);
             }
         }
 
