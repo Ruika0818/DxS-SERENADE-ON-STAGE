@@ -3,63 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>應援網後台管理</title>
+    <title>SVT DXS 應援站 - 雙螢幕中控台</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style> body { background-color: #f1f5f9; } </style>
+    <!-- 引入拖曳排序套件 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f8fafc; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
 </head>
-<body class="text-slate-800 p-4 md:p-8">
+<body class="text-slate-800 antialiased min-h-screen">
 
-    <!-- 簡易密碼牆 (防君子不防小人，真正安全靠 Firebase 規則) -->
-    <div id="login-screen" class="max-w-sm mx-auto mt-20 bg-white p-8 rounded-xl shadow-md text-center">
-        <h2 class="text-xl font-bold mb-4 text-[#92A8D1]">站長專屬後台</h2>
-        <input type="password" id="admin-pwd" class="w-full border p-3 rounded mb-4" placeholder="請輸入密碼">
-        <button onclick="checkPwd()" class="w-full bg-[#F7CAC9] text-white font-bold p-3 rounded">登入</button>
+    <!-- 登入畫面 -->
+    <div id="login-screen" class="flex items-center justify-center h-screen bg-slate-800 relative z-50">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center">
+            <h2 class="text-2xl font-black mb-6 text-slate-700">🔒 站長後台登入</h2>
+            <input type="password" id="admin-pwd" placeholder="請輸入密碼" class="w-full mb-4 p-3 rounded-lg border border-slate-200 focus:outline-none focus:border-[#92A8D1] text-center tracking-widest text-lg">
+            <button onclick="checkPwd()" class="w-full bg-[#92A8D1] hover:bg-[#7a93c2] text-white font-bold py-3 rounded-lg transition-colors shadow-md">進入中控台</button>
+        </div>
     </div>
 
-    <!-- 後台管理介面 -->
-    <div id="admin-panel" class="max-w-4xl mx-auto hidden">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-2xl font-black">後台管理系統</h1>
-            <a href="index.html" class="text-blue-500 underline">前往前台觀看</a>
-        </div>
-
-        <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
-            <h3 class="text-lg font-bold mb-4">✨ 新增 / 編輯歌曲</h3>
-            <input type="hidden" id="edit-id">
-            
-            <div class="space-y-4">
-                <div>
-                    <input type="text" id="input-title" class="w-full border p-3 rounded" placeholder="歌曲名稱 (例如：Blue)">
-                    <p class="text-xs text-[#e87a78] mt-1 ml-1 font-medium">💡 提示：請輸入與前台歌單「完全相同」的歌名（不用打數字），前台對應的歌曲就會自動亮起喔！</p>
-                </div>
-                <input type="text" id="input-videoid" class="w-full border p-3 rounded" placeholder="YouTube 影片 ID (例如 dZNPbNkKAss)">
-                <input type="number" id="input-starttime" class="w-full border p-3 rounded" placeholder="影片開始秒數 (選填，例如 15)">
-                
-                <div>
-                    <label class="cursor-pointer bg-slate-200 text-slate-700 text-xs px-3 py-1 rounded inline-block mb-2">
-                        📁 匯入 .txt 歌詞檔
-                        <input type="file" id="input-file" accept=".txt" class="hidden" onchange="window.handleFile(event)">
-                    </label>
-                    <textarea id="input-lyrics" rows="10" class="w-full border p-3 rounded font-mono text-sm" placeholder="輸入歌詞... [應援詞] {中文翻譯}"></textarea>
-                </div>
-
-                <button onclick="window.saveData()" class="bg-[#92A8D1] text-white font-bold px-6 py-2 rounded">儲存並發布</button>
-                <button onclick="window.clearForm()" class="bg-slate-200 px-6 py-2 rounded">清空</button>
+    <!-- 後台管理主介面 (雙螢幕) -->
+    <div id="admin-panel" class="w-full h-screen hidden flex flex-col md:flex-row overflow-hidden bg-slate-100 absolute top-0 left-0">
+        
+        <!-- 左側工作區 -->
+        <div class="w-full md:w-1/2 lg:w-5/12 p-4 md:p-6 overflow-y-auto h-full bg-white relative z-10 shadow-xl flex flex-col">
+            <div class="flex justify-between items-center mb-6 shrink-0">
+                <h1 class="text-2xl font-black text-slate-700">網站中控台 (CMS)</h1>
+                <a href="index.html" target="_blank" class="text-sm bg-white border border-slate-200 px-4 py-2 rounded-full shadow-sm hover:bg-slate-50 transition-colors md:hidden">👁️ 另開前台</a>
             </div>
+
+            <!-- 頁籤切換 -->
+            <div class="flex gap-2 mb-6 border-b border-slate-100 pb-2 overflow-x-auto shrink-0">
+                <button onclick="switchTab('settings')" id="tab-settings" class="px-4 py-2 rounded-lg font-bold text-slate-400 hover:text-slate-700 transition-colors whitespace-nowrap">⚙️ 全站設定</button>
+                <button onclick="switchTab('songs')" id="tab-songs" class="px-4 py-2 rounded-lg font-bold bg-[#92A8D1]/10 text-[#92A8D1] transition-colors whitespace-nowrap">🎵 歌單管理</button>
+                <button onclick="switchTab('comments')" id="tab-comments" class="px-4 py-2 rounded-lg font-bold text-slate-400 hover:text-slate-700 transition-colors whitespace-nowrap">💬 留言管理</button>
+            </div>
+
+            <!-- ================= Tab 1: 全站設定 ================= -->
+            <div id="panel-settings" class="hidden space-y-5 flex-grow">
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <label class="block text-sm font-bold text-slate-700 mb-2">網站大標題</label>
+                    <input type="text" id="site-title" class="w-full p-3 rounded-lg border border-slate-200 focus:outline-none focus:border-[#92A8D1]" placeholder="例如: 偶像專屬應援站">
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <label class="block text-sm font-bold text-slate-700 mb-2">歌單分類 (請用半形逗號 , 隔開)</label>
+                    <input type="text" id="site-categories" class="w-full p-3 rounded-lg border border-slate-200 focus:outline-none focus:border-[#92A8D1]" placeholder="例如: DxS, SOLO, ENCORE">
+                    <p class="text-xs text-slate-400 mt-2">設定好分類後，新增歌曲時才能選擇放在哪個分類下喔！</p>
+                </div>
+                <button onclick="saveSettings()" class="w-full bg-[#92A8D1] hover:bg-[#7a93c2] text-white font-bold py-3 rounded-lg transition-colors shadow-md">儲存全站設定</button>
+            </div>
+
+            <!-- ================= Tab 2: 歌曲管理 ================= -->
+            <div id="panel-songs" class="block flex-grow pb-10">
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 mb-8 shadow-inner">
+                    <h3 class="font-bold mb-4 flex items-center gap-2 text-slate-700">✨ 新增 / 編輯歌曲</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">歌曲名稱 (請與總表一致)</label>
+                            <input type="text" id="input-title" class="w-full p-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-[#92A8D1]" placeholder="例如: Blue">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">所屬分類</label>
+                            <select id="input-category" class="w-full p-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-[#92A8D1]">
+                                <!-- 分類選項由 JS 動態載入 -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">YouTube 影片 ID</label>
+                            <input type="text" id="input-video" class="w-full p-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-[#92A8D1]" placeholder="例如: dQw4w9WgXcQ">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">影片開始秒數</label>
+                            <input type="number" id="input-start" class="w-full p-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-[#92A8D1]" placeholder="例如: 0">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="flex justify-between items-end mb-1">
+                            <label class="block text-xs font-bold text-slate-500">歌詞與應援詞</label>
+                            <label class="cursor-pointer bg-[#92A8D1]/10 hover:bg-[#92A8D1]/20 text-[#92A8D1] font-bold text-xs px-3 py-1.5 rounded transition-colors shadow-sm">
+                                📁 點選匯入 .txt (可多選)
+                                <input type="file" id="input-file" accept=".txt" multiple class="hidden" onchange="window.handleFile(event)">
+                            </label>
+                        </div>
+                        <!-- 拖曳區塊 -->
+                        <textarea id="input-lyrics" rows="8" class="w-full border-2 border-dashed border-slate-300 p-3 rounded-lg font-mono text-sm transition-colors focus:outline-none focus:border-[#92A8D1]" placeholder="直接貼上歌詞，或是將一份或多份 .txt 檔案拖曳到這個框框裡！&#10;&#10;[應援詞請用中括號]&#10;{中文翻譯請用大括號}"></textarea>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="saveSong()" class="flex-1 bg-[#92A8D1] hover:bg-[#7a93c2] text-white font-bold py-2.5 rounded-lg transition-colors shadow-sm">儲存並發布</button>
+                        <button onclick="clearForm()" class="px-4 bg-white border border-slate-300 text-slate-600 font-bold py-2.5 rounded-lg hover:bg-slate-50 transition-colors">清除重填</button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold mb-4 text-slate-700 flex justify-between items-center">
+                        <span>📋 已上架歌曲列表</span>
+                        <span class="text-xs font-normal text-slate-400 bg-slate-100 px-2 py-1 rounded">上下拖曳可直接排序</span>
+                    </h3>
+                    <!-- 拖曳排序清單容器 -->
+                    <div id="admin-song-list" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- ================= Tab 3: 留言管理 ================= -->
+            <div id="panel-comments" class="hidden flex-grow">
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold mb-4 flex justify-between items-center text-slate-700">
+                        <span>💬 粉絲留言審核區</span>
+                        <span class="text-xs font-normal text-slate-400">最新留言顯示於最上方</span>
+                    </h3>
+                    <div id="admin-comments-list" class="space-y-3"></div>
+                </div>
+            </div>
+
+        </div> <!-- 結束左側工作區 -->
+
+        <!-- 右側即時預覽區 (僅大螢幕顯示) -->
+        <div class="hidden md:flex md:w-1/2 lg:w-7/12 bg-slate-900 flex-col h-full relative z-0">
+            <div class="bg-slate-800 text-slate-300 text-xs px-4 py-3 flex justify-between items-center border-b border-slate-700 shadow-sm">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                    <span>前台即時預覽 (資料儲存後自動更新)</span>
+                </div>
+                <button onclick="document.getElementById('preview-frame').src='index.html'" class="hover:text-white px-3 py-1 rounded border border-slate-600 bg-slate-700 transition-colors">🔄 手動重新載入</button>
+            </div>
+            <!-- 使用 iframe 嵌入前台 -->
+            <iframe id="preview-frame" src="index.html" class="w-full flex-grow border-none bg-white"></iframe>
         </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-sm">
-            <h3 class="font-bold mb-4">📋 已發布列表</h3>
-            <div id="admin-list" class="space-y-2"></div>
-        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, addDoc, deleteDoc, query, orderBy, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
-        // ⚠️ 第 3 步：這裡也要貼上跟 index.html 一模一樣的 Firebase 設定
+        // ⚠️ 貼上你的 Firebase Config (務必替換)
         // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyDbLTRVsas6vglUb_4b7wXv_RfYL3E6Bxg",
@@ -69,97 +154,309 @@
             messagingSenderId: "56387976084",
             appId: "1:56387976084:web:e7024f58ceaf038ecb2d81"
         };
-        // ==========================================
+       // ==========================================
 
-        let appDb, songsData = [];
-        
+        let appDb;
+        let currentEditingId = null;
+        let songsData = [];
+
+        // 自訂提示框 (Toast)
+        window.showToast = function(msg, isError = false) {
+            const box = document.createElement('div');
+            box.className = `fixed top-10 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-full shadow-2xl z-[9999] transition-all duration-300 font-bold text-sm ${isError ? 'bg-red-500 text-white' : 'bg-slate-800 text-white'}`;
+            box.style.opacity = '0';
+            box.style.transform = 'translate(-50%, -20px)';
+            box.innerText = msg;
+            document.body.appendChild(box);
+            
+            requestAnimationFrame(() => {
+                box.style.opacity = '1';
+                box.style.transform = 'translate(-50%, 0)';
+            });
+            
+            setTimeout(() => {
+                box.style.opacity = '0';
+                box.style.transform = 'translate(-50%, -20px)';
+                setTimeout(() => box.remove(), 300);
+            }, 3000);
+        }
+
+        // 簡單密碼登入
         window.checkPwd = function() {
             if (document.getElementById('admin-pwd').value === 'svtdxs') {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('admin-panel').classList.remove('hidden');
                 initFirebase();
             } else {
-                alert('密碼錯誤');
+                showToast('❌ 密碼錯誤！', true);
             }
-        };
+        }
 
         function initFirebase() {
-            const app = initializeApp(firebaseConfig);
-            appDb = getFirestore(app);
-            
-            const q = query(collection(appDb, "songs"), orderBy("createdAt", "desc"));
-            onSnapshot(q, (snapshot) => {
-                songsData = [];
-                snapshot.forEach((doc) => songsData.push({ id: doc.id, ...doc.data() }));
-                renderAdminList();
+            try {
+                const app = initializeApp(firebaseConfig);
+                appDb = getFirestore(app);
+                showToast('✅ 成功連線至資料庫！');
+
+                // 1. 載入全站設定
+                onSnapshot(doc(appDb, "settings", "global"), (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        document.getElementById('site-title').value = data.title || "";
+                        document.getElementById('site-categories').value = data.categories ? data.categories.join(',') : "";
+                        updateCategorySelect(data.categories || []);
+                    }
+                });
+
+                // 2. 載入歌曲並初始化拖曳排序
+                const q = query(collection(appDb, "songs"), orderBy("order", "asc"));
+                onSnapshot(q, (snapshot) => {
+                    songsData = [];
+                    snapshot.forEach((doc) => songsData.push({ id: doc.id, ...doc.data() }));
+                    renderSongList();
+                });
+
+                // 3. 載入留言
+                const cq = query(collection(appDb, "comments"), orderBy("createdAt", "desc"));
+                onSnapshot(cq, (snapshot) => {
+                    const list = document.getElementById('admin-comments-list');
+                    list.innerHTML = '';
+                    snapshot.forEach((docSnap) => {
+                        const data = docSnap.data();
+                        const date = data.createdAt ? new Date(data.createdAt.toMillis()).toLocaleString('zh-TW') : '未知時間';
+                        list.innerHTML += `
+                            <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 flex justify-between items-start gap-4">
+                                <div>
+                                    <div class="text-xs text-slate-400 mb-1">${date} • <span class="font-bold text-slate-600">${data.name}</span></div>
+                                    <div class="text-sm text-slate-700">${data.text}</div>
+                                </div>
+                                <button onclick="deleteComment('${docSnap.id}')" class="text-red-400 hover:text-red-600 text-xs whitespace-nowrap px-2 py-1 bg-white border border-red-100 rounded shadow-sm">🗑️ 刪除</button>
+                            </div>
+                        `;
+                    });
+                });
+
+            } catch (e) {
+                showToast('❌ 資料庫連線失敗，請檢查 Config 裡面的鑰匙是否正確', true);
+            }
+        }
+
+        window.switchTab = function(tab) {
+            ['settings', 'songs', 'comments'].forEach(t => {
+                document.getElementById(`panel-${t}`).style.display = (t === tab) ? 'block' : 'none';
+                const btn = document.getElementById(`tab-${t}`);
+                if(t === tab) {
+                    btn.classList.add('bg-[#92A8D1]/10', 'text-[#92A8D1]');
+                    btn.classList.remove('text-slate-400');
+                } else {
+                    btn.classList.remove('bg-[#92A8D1]/10', 'text-[#92A8D1]');
+                    btn.classList.add('text-slate-400');
+                }
             });
         }
 
-        window.handleFile = function(e) {
-            const reader = new FileReader();
-            reader.onload = (event) => document.getElementById('input-lyrics').value = event.target.result;
-            reader.readAsText(e.target.files[0]);
-            e.target.value = '';
+        function updateCategorySelect(categories) {
+            const select = document.getElementById('input-category');
+            const currentVal = select.value;
+            select.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
+            if (categories.includes(currentVal)) select.value = currentVal;
         }
 
-        window.saveData = async function() {
-            const id = document.getElementById('edit-id').value;
-            const data = {
-                title: document.getElementById('input-title').value,
-                videoId: document.getElementById('input-videoid').value,
-                startTime: document.getElementById('input-starttime').value || 0,
+        window.saveSettings = async function() {
+            const title = document.getElementById('site-title').value;
+            const categories = document.getElementById('site-categories').value.split(',').map(s => s.trim()).filter(s => s);
+            
+            await setDoc(doc(appDb, "settings", "global"), {
+                title: title,
+                categories: categories
+            }, { merge: true });
+            
+            showToast('✅ 全站設定已儲存！');
+            refreshPreview();
+        }
+
+        // ================= 檔案與拖曳處理 (批次匯入) =================
+        window.handleFile = async function(e) {
+            const files = Array.from(e.target.files);
+            e.target.value = ''; // 重置 input
+            await processFiles(files);
+        }
+
+        const lyricsArea = document.getElementById('input-lyrics');
+        lyricsArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            lyricsArea.classList.add('border-[#92A8D1]', 'bg-blue-50');
+        });
+        lyricsArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            lyricsArea.classList.remove('border-[#92A8D1]', 'bg-blue-50');
+        });
+        lyricsArea.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            lyricsArea.classList.remove('border-[#92A8D1]', 'bg-blue-50');
+            if (e.dataTransfer.files.length > 0) {
+                const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.txt'));
+                if (files.length > 0) {
+                    await processFiles(files);
+                } else {
+                    showToast('❌ 請上傳 .txt 格式的檔案', true);
+                }
+            }
+        });
+
+        async function processFiles(files) {
+            if (files.length === 1) {
+                // 單一檔案：讀取內容到文字框
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    document.getElementById('input-lyrics').value = event.target.result;
+                    showToast('📄 成功載入歌詞，請填寫其他資訊後儲存！');
+                };
+                reader.readAsText(files[0]);
+            } else if (files.length > 1) {
+                // 多檔案：背景批次新增
+                showToast('⏳ 正在背景批次匯入多首歌曲...', false);
+                const batch = writeBatch(appDb);
+                let defaultCategory = document.getElementById('input-category').value || '未分類';
+                let count = 0;
+
+                for (let file of files) {
+                    const text = await file.text();
+                    const title = file.name.replace('.txt', ''); // 自動把檔名當作歌名
+                    const newSongRef = doc(collection(appDb, "songs"));
+                    batch.set(newSongRef, {
+                        title: title,
+                        category: defaultCategory,
+                        order: 99,
+                        videoId: "",
+                        startTime: 0,
+                        lyrics: text
+                    });
+                    count++;
+                }
+                
+                await batch.commit();
+                showToast(`✅ 成功批次新增 ${count} 首歌！請在下方列表點擊「編輯」補上影片 ID`);
+                refreshPreview();
+            }
+        }
+
+        // ================= CRUD 與排序邏輯 =================
+        window.saveSong = async function() {
+            const title = document.getElementById('input-title').value.trim();
+            if (!title) return showToast('❌ 請輸入歌曲名稱', true);
+
+            const songData = {
+                title: title,
+                category: document.getElementById('input-category').value,
+                videoId: document.getElementById('input-video').value.trim(),
+                startTime: parseInt(document.getElementById('input-start').value) || 0,
                 lyrics: document.getElementById('input-lyrics').value
             };
-            
-            if(!data.title || !data.videoId) return alert('標題跟影片ID必填！');
 
-            if (id) {
-                await updateDoc(doc(appDb, "songs", id), data);
-                alert('更新成功！');
-            } else {
-                data.createdAt = Date.now();
-                await addDoc(collection(appDb, "songs"), data);
-                alert('發布成功！');
+            try {
+                if (currentEditingId) {
+                    await setDoc(doc(appDb, "songs", currentEditingId), songData, { merge: true });
+                    showToast('✅ 更新成功！');
+                } else {
+                    songData.order = 99; // 新歌預設排到最後
+                    await addDoc(collection(appDb, "songs"), songData);
+                    showToast('✅ 新增成功！');
+                }
+                clearForm();
+                refreshPreview();
+            } catch (e) {
+                showToast('❌ 儲存失敗', true);
             }
-            window.clearForm();
         }
 
         window.editSong = function(id) {
             const song = songsData.find(s => s.id === id);
-            document.getElementById('edit-id').value = song.id;
+            if (!song) return;
+            currentEditingId = id;
             document.getElementById('input-title').value = song.title;
-            document.getElementById('input-videoid').value = song.videoId;
-            document.getElementById('input-starttime').value = song.startTime;
+            document.getElementById('input-category').value = song.category;
+            document.getElementById('input-video').value = song.videoId;
+            document.getElementById('input-start').value = song.startTime || 0;
             document.getElementById('input-lyrics').value = song.lyrics;
-            window.scrollTo(0, 0);
+            
+            // 切換回設定頁籤並捲動到最上方
+            switchTab('songs');
+            document.querySelector('.overflow-y-auto').scrollTo({ top: 0, behavior: 'smooth' });
+            showToast('✏️ 已載入歌曲資料，進入編輯模式');
         }
 
         window.deleteSong = async function(id) {
-            if(confirm('確定刪除？')) await deleteDoc(doc(appDb, "songs", id));
+            if(confirm('確定要刪除這首歌嗎？')) {
+                await deleteDoc(doc(appDb, "songs", id));
+                showToast('🗑️ 歌曲已刪除');
+                refreshPreview();
+            }
         }
 
         window.clearForm = function() {
-            document.getElementById('edit-id').value = '';
+            currentEditingId = null;
             document.getElementById('input-title').value = '';
-            document.getElementById('input-videoid').value = '';
-            document.getElementById('input-starttime').value = '';
+            document.getElementById('input-video').value = '';
+            document.getElementById('input-start').value = '';
             document.getElementById('input-lyrics').value = '';
         }
 
-        function renderAdminList() {
-            const list = document.getElementById('admin-list');
+        window.deleteComment = async function(id) {
+            if(confirm('確定要刪除這則留言嗎？')) {
+                await deleteDoc(doc(appDb, "comments", id));
+                showToast('🗑️ 留言已刪除');
+                refreshPreview();
+            }
+        }
+
+        function renderSongList() {
+            const list = document.getElementById('admin-song-list');
             list.innerHTML = '';
+            
             songsData.forEach(song => {
                 list.innerHTML += `
-                    <div class="flex justify-between bg-slate-50 p-3 rounded border">
-                        <span>${song.title}</span>
-                        <div>
-                            <button onclick="window.editSong('${song.id}')" class="text-blue-500 mr-3">編輯</button>
-                            <button onclick="window.deleteSong('${song.id}')" class="text-red-500">刪除</button>
+                    <div data-id="${song.id}" class="bg-white border border-slate-200 p-3 rounded-lg flex items-center justify-between shadow-sm hover:shadow transition-shadow group">
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <span class="drag-handle cursor-grab text-slate-400 hover:text-slate-600 px-1 py-2 active:cursor-grabbing text-lg" title="按住拖曳排序">☰</span>
+                            <span class="text-[10px] font-bold text-[#92A8D1] bg-[#92A8D1]/10 px-2 py-1 rounded whitespace-nowrap">${song.category}</span>
+                            <span class="font-bold text-slate-700 truncate">${song.title}</span>
+                        </div>
+                        <div class="flex gap-2 shrink-0">
+                            <button onclick="editSong('${song.id}')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded transition-colors font-bold">編輯</button>
+                            <button onclick="deleteSong('${song.id}')" class="text-xs bg-red-50 hover:bg-red-100 text-red-500 px-3 py-1.5 rounded transition-colors font-bold">刪除</button>
                         </div>
                     </div>
                 `;
             });
+
+            // 初始化 SortableJS 拖曳功能
+            new Sortable(list, {
+                handle: '.drag-handle', // 只有抓這個小漢堡才能拖曳
+                animation: 150,
+                ghostClass: 'bg-blue-50',
+                onEnd: async function () {
+                    showToast('🔄 正在背景自動儲存新排序...', false);
+                    const items = list.querySelectorAll('[data-id]');
+                    const batch = writeBatch(appDb);
+                    
+                    items.forEach((item, index) => {
+                        const id = item.getAttribute('data-id');
+                        const ref = doc(appDb, "songs", id);
+                        batch.update(ref, { order: index + 1 });
+                    });
+                    
+                    await batch.commit();
+                    showToast('✅ 排序已成功更新！');
+                    refreshPreview();
+                }
+            });
+        }
+
+        function refreshPreview() {
+            // 強制重新載入右側 iframe (如果你是在大螢幕編輯的話)
+            const iframe = document.getElementById('preview-frame');
+            if (iframe) iframe.src = iframe.src;
         }
     </script>
 </body>
