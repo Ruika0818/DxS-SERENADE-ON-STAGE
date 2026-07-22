@@ -1,2 +1,3 @@
-# DXS-Concert-Fanchant
-DXS Concert Fanchant
+# DxS [SERENADE] ON STAGE - KAOHSIUNG 
+感恩、讚嘆、歡呼！🐶 DK & SEUNGKWAN 的小夜曲🍊即將跨海搬來台灣啦！為了給跟我一樣臨時抱佛腳的克拉們有武功秘笈可以趕快惡補，捏了一個網站><<br>
+大家加減用～嘻嘻～祝福大家成果發表會順利！希望講評導師都給滿分500婚><
