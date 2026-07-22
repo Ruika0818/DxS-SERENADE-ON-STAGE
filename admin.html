@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>應援網後台管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style> body { background-color: #f1f5f9; } </style>
+</head>
+<body class="text-slate-800 p-4 md:p-8">
+
+    <!-- 簡易密碼牆 (防君子不防小人，真正安全靠 Firebase 規則) -->
+    <div id="login-screen" class="max-w-sm mx-auto mt-20 bg-white p-8 rounded-xl shadow-md text-center">
+        <h2 class="text-xl font-bold mb-4 text-[#92A8D1]">站長專屬後台</h2>
+        <input type="password" id="admin-pwd" class="w-full border p-3 rounded mb-4" placeholder="請輸入密碼">
+        <button onclick="checkPwd()" class="w-full bg-[#F7CAC9] text-white font-bold p-3 rounded">登入</button>
+    </div>
+
+    <!-- 後台管理介面 -->
+    <div id="admin-panel" class="max-w-4xl mx-auto hidden">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl font-black">後台管理系統</h1>
+            <a href="index.html" class="text-blue-500 underline">前往前台觀看</a>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
+            <h3 class="text-lg font-bold mb-4">✨ 新增 / 編輯歌曲</h3>
+            <input type="hidden" id="edit-id">
+            
+            <div class="space-y-4">
+                <input type="text" id="input-title" class="w-full border p-3 rounded" placeholder="歌曲名稱">
+                <input type="text" id="input-videoid" class="w-full border p-3 rounded" placeholder="YouTube 影片 ID (例如 dZNPbNkKAss)">
+                <input type="number" id="input-starttime" class="w-full border p-3 rounded" placeholder="影片開始秒數 (選填，例如 15)">
+                
+                <div>
+                    <label class="cursor-pointer bg-slate-200 text-slate-700 text-xs px-3 py-1 rounded inline-block mb-2">
+                        📁 匯入 .txt 歌詞檔
+                        <input type="file" id="input-file" accept=".txt" class="hidden" onchange="window.handleFile(event)">
+                    </label>
+                    <textarea id="input-lyrics" rows="10" class="w-full border p-3 rounded font-mono text-sm" placeholder="輸入歌詞... [應援詞] {中文翻譯}"></textarea>
+                </div>
+
+                <button onclick="window.saveData()" class="bg-[#92A8D1] text-white font-bold px-6 py-2 rounded">儲存並發布</button>
+                <button onclick="window.clearForm()" class="bg-slate-200 px-6 py-2 rounded">清空</button>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm">
+            <h3 class="font-bold mb-4">📋 已發布列表</h3>
+            <div id="admin-list" class="space-y-2"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ==========================================
+        // ⚠️ 第 3 步：這裡也要貼上跟 index.html 一模一樣的 Firebase 設定
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDbLTRVsas6vglUb_4b7wXv_RfYL3E6Bxg",
+            authDomain: "dxs-serenade-on-stage.firebaseapp.com",
+            projectId: "dxs-serenade-on-stage",
+            storageBucket: "dxs-serenade-on-stage.firebasestorage.app",
+            messagingSenderId: "56387976084",
+            appId: "1:56387976084:web:e7024f58ceaf038ecb2d81"
+        };
+        // ==========================================
+
+        let appDb, songsData = [];
+        
+        window.checkPwd = function() {
+            if (document.getElementById('admin-pwd').value === 'svtdxs') {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('admin-panel').classList.remove('hidden');
+                initFirebase();
+            } else {
+                alert('密碼錯誤');
+            }
+        };
+
+        function initFirebase() {
+            const app = initializeApp(firebaseConfig);
+            appDb = getFirestore(app);
+            
+            const q = query(collection(appDb, "songs"), orderBy("createdAt", "desc"));
+            onSnapshot(q, (snapshot) => {
+                songsData = [];
+                snapshot.forEach((doc) => songsData.push({ id: doc.id, ...doc.data() }));
+                renderAdminList();
+            });
+        }
+
+        window.handleFile = function(e) {
+            const reader = new FileReader();
+            reader.onload = (event) => document.getElementById('input-lyrics').value = event.target.result;
+            reader.readAsText(e.target.files[0]);
+            e.target.value = '';
+        }
+
+        window.saveData = async function() {
+            const id = document.getElementById('edit-id').value;
+            const data = {
+                title: document.getElementById('input-title').value,
+                videoId: document.getElementById('input-videoid').value,
+                startTime: document.getElementById('input-starttime').value || 0,
+                lyrics: document.getElementById('input-lyrics').value
+            };
+            
+            if(!data.title || !data.videoId) return alert('標題跟影片ID必填！');
+
+            if (id) {
+                await updateDoc(doc(appDb, "songs", id), data);
+                alert('更新成功！');
+            } else {
+                data.createdAt = Date.now();
+                await addDoc(collection(appDb, "songs"), data);
+                alert('發布成功！');
+            }
+            window.clearForm();
+        }
+
+        window.editSong = function(id) {
+            const song = songsData.find(s => s.id === id);
+            document.getElementById('edit-id').value = song.id;
+            document.getElementById('input-title').value = song.title;
+            document.getElementById('input-videoid').value = song.videoId;
+            document.getElementById('input-starttime').value = song.startTime;
+            document.getElementById('input-lyrics').value = song.lyrics;
+            window.scrollTo(0, 0);
+        }
+
+        window.deleteSong = async function(id) {
+            if(confirm('確定刪除？')) await deleteDoc(doc(appDb, "songs", id));
+        }
+
+        window.clearForm = function() {
+            document.getElementById('edit-id').value = '';
+            document.getElementById('input-title').value = '';
+            document.getElementById('input-videoid').value = '';
+            document.getElementById('input-starttime').value = '';
+            document.getElementById('input-lyrics').value = '';
+        }
+
+        function renderAdminList() {
+            const list = document.getElementById('admin-list');
+            list.innerHTML = '';
+            songsData.forEach(song => {
+                list.innerHTML += `
+                    <div class="flex justify-between bg-slate-50 p-3 rounded border">
+                        <span>${song.title}</span>
+                        <div>
+                            <button onclick="window.editSong('${song.id}')" class="text-blue-500 mr-3">編輯</button>
+                            <button onclick="window.deleteSong('${song.id}')" class="text-red-500">刪除</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
