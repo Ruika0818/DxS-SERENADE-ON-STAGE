@@ -25,27 +25,34 @@
 
     <main class="flex-grow max-w-6xl mx-auto w-full p-4 md:p-6">
         
-        <!-- ================= 首頁列表畫面 ================= -->
-        <section id="view-list" class="block">
-            
-            <!-- 動態頂部自訂區塊 (由後台控制) -->
-            <div id="dynamic-top-block" class="mb-8 empty:hidden"></div>
+        <!-- ================= 首頁列表畫面 (雙欄佈局) ================= -->
+        <section id="view-list" class="block pb-20">
+            <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
+                
+                <!-- 左側：動態頂部公告 (海報與公告區) -->
+                <div class="w-full lg:w-5/12 shrink-0 lg:sticky lg:top-[90px]">
+                    <div id="dynamic-top-block" class="empty:hidden"></div>
+                </div>
 
-            <div class="text-center py-4 mb-6">
-                <h2 id="hero-title" class="text-3xl font-black mb-2 svt-text">載入中...</h2>
-                <p class="text-slate-500 text-sm">點擊帶有標籤的歌曲，開始練習應援！</p>
-            </div>
-            
-            <div id="loading" class="text-center text-slate-400 py-10 flex flex-col items-center">
-                <svg class="animate-spin h-8 w-8 text-[#92A8D1] mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                正在與雲端資料庫同步...
-            </div>
-            
-            <!-- 動態歌單容器 -->
-            <div id="song-list-container" class="hidden flex flex-col gap-6 pb-6"></div>
+                <!-- 右側：歌單列表區 -->
+                <div class="w-full lg:w-7/12">
+                    <div class="text-left mb-6 md:mt-2">
+                        <h2 id="hero-title" class="text-2xl md:text-3xl font-black mb-2 svt-text">載入中...</h2>
+                        <p class="text-slate-500 text-sm">點擊帶有標籤的歌曲，開始練習應援！</p>
+                    </div>
+                    
+                    <div id="loading" class="text-center text-slate-400 py-10 flex flex-col items-center">
+                        <svg class="animate-spin h-8 w-8 text-[#92A8D1] mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        正在與雲端資料庫同步...
+                    </div>
+                    
+                    <!-- 動態歌單容器 -->
+                    <div id="song-list-container" class="hidden flex flex-col gap-6 pb-6"></div>
 
-            <!-- 動態底部自訂區塊 (由後台控制) -->
-            <div id="dynamic-bottom-block" class="mt-4 mb-10 empty:hidden"></div>
+                    <!-- 動態底部自訂區塊 (由後台控制) -->
+                    <div id="dynamic-bottom-block" class="mt-4 empty:hidden"></div>
+                </div>
+            </div>
         </section>
 
         <!-- ================= 單曲教學畫面 (左右分欄) ================= -->
