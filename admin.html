@@ -22,7 +22,7 @@
             <h2 class="text-2xl font-black mb-6 text-slate-700">🔒 管理員登入</h2>
             <input type="password" id="admin-pwd" placeholder="請輸入雲端密碼" class="w-full mb-4 p-3 rounded-lg border border-slate-200 focus:outline-none focus:border-[#92A8D1] text-center tracking-widest text-lg">
             <button onclick="checkPwd()" class="w-full bg-[#92A8D1] hover:bg-[#7a93c2] text-white font-bold py-3 rounded-lg transition-colors shadow-md">進入中控台</button>
-            <p class="text-[11px] text-slate-400 mt-4">提示：初始預設密碼為 svtdxs（登入後可至全站設定修改）</p>
+            <p class="text-[11px] text-slate-400 mt-4">誰是SEVENTEEN的兵==!! 我是==!!</p>
         </div>
     </div>
 
@@ -40,7 +40,7 @@
             <div class="flex gap-2 mb-6 border-b border-slate-100 pb-2 overflow-x-auto shrink-0">
                 <button onclick="switchTab('settings')" id="tab-settings" class="px-3 py-2 rounded-lg font-bold text-slate-400 hover:text-slate-700 transition-colors whitespace-nowrap text-sm">⚙️ 全站設定</button>
                 <button onclick="switchTab('songs')" id="tab-songs" class="px-3 py-2 rounded-lg font-bold bg-[#92A8D1]/10 text-[#92A8D1] transition-colors whitespace-nowrap text-sm">🎵 歌單管理</button>
-                <button onclick="switchTab('comments')" id="tab-comments" class="px-3 py-2 rounded-lg font-bold text-slate-400 hover:text-slate-700 transition-colors whitespace-nowrap text-sm">💬 留言審核</button>
+                <button onclick="switchTab('comments')" id="tab-comments" class="px-3 py-2 rounded-lg font-bold text-slate-400 hover:text-slate-700 transition-colors whitespace-nowrap text-sm">💬 留言審核與回覆</button>
             </div>
 
             <!-- Tab 1: 全站設定 -->
@@ -119,8 +119,8 @@
             <!-- Tab 3: 留言管理 -->
             <div id="panel-comments" class="hidden flex-grow">
                 <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                    <h3 class="font-bold mb-3 text-xs text-slate-700">💬 粉絲留言審核區</h3>
-                    <div id="admin-comments-list" class="space-y-2"></div>
+                    <h3 class="font-bold mb-3 text-xs text-slate-700">💬 粉絲留言審核與回覆區</h3>
+                    <div id="admin-comments-list" class="space-y-4 mt-4"></div>
                 </div>
             </div>
         </div>
@@ -139,8 +139,9 @@
     </div>
 
     <script type="module">
+        // 💡 導入 updateDoc 來支援回覆功能
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, setDoc, addDoc, deleteDoc, query, orderBy, writeBatch, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, addDoc, deleteDoc, updateDoc, query, orderBy, writeBatch, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
         // ⚠️ 請把你的 Firebase Config 貼在這裡取代！
@@ -168,22 +169,19 @@
             setTimeout(() => { box.style.opacity = '0'; box.style.transform = 'translate(-50%, -20px)'; setTimeout(() => box.remove(), 300); }, 3000);
         }
 
-        // 雲端密碼驗證
         window.checkPwd = async function() {
             const inputPwd = document.getElementById('admin-pwd').value;
             try {
                 const app = initializeApp(firebaseConfig);
                 appDb = getFirestore(app);
                 
-                // 去資料庫抓取設定
                 const docRef = doc(appDb, "settings", "global");
                 const docSnap = await getDoc(docRef);
                 
-                let correctPwd = "svtdxs"; // 預設初始密碼
+                let correctPwd = "svtdxs"; 
                 if (docSnap.exists() && docSnap.data().adminPassword) {
                     correctPwd = docSnap.data().adminPassword;
                 } else {
-                    // 如果資料庫還沒有設定檔，先自動幫建立預設密碼
                     await setDoc(docRef, { adminPassword: "svtdxs", categories: ["DxS", "SOLO", "ENCORE"] }, { merge: true });
                 }
 
@@ -202,7 +200,6 @@
         }
 
         function initFirebaseListeners() {
-            // 載入設定
             onSnapshot(doc(appDb, "settings", "global"), (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
@@ -215,7 +212,6 @@
                 }
             });
 
-            // 載入歌曲
             const q = query(collection(appDb, "songs"), orderBy("order", "asc"));
             onSnapshot(q, (snapshot) => {
                 songsData = [];
@@ -223,7 +219,7 @@
                 renderSongList();
             });
 
-            // 載入留言
+            // 💡 留言區功能升級 (加入回覆框)
             const cq = query(collection(appDb, "comments"), orderBy("createdAt", "desc"));
             onSnapshot(cq, (snapshot) => {
                 const list = document.getElementById('admin-comments-list');
@@ -232,13 +228,25 @@
                 snapshot.forEach((docSnap) => {
                     const data = docSnap.data();
                     const date = data.createdAt ? new Date(data.createdAt.toMillis()).toLocaleString('zh-TW', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'}) : '';
+                    const replyValue = data.reply || '';
+                    
                     list.innerHTML += `
-                        <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100 flex justify-between items-start gap-3">
-                            <div>
-                                <div class="text-[10px] text-slate-400 mb-0.5">${date} • <span class="font-bold text-slate-600">${data.name}</span></div>
-                                <div class="text-xs text-slate-700">${data.text}</div>
+                        <div class="bg-slate-50 p-3.5 rounded-lg border border-slate-200">
+                            <div class="flex justify-between items-start gap-3 mb-2">
+                                <div>
+                                    <div class="text-[10px] text-slate-400 mb-0.5">${date} • <span class="font-bold text-slate-700">${data.name}</span></div>
+                                    <div class="text-xs text-slate-800 font-medium">${data.text}</div>
+                                </div>
+                                <button onclick="deleteComment('${docSnap.id}')" class="text-red-400 hover:text-red-600 text-[10px] px-2 py-1 bg-white border border-red-100 rounded shadow-sm shrink-0">刪除留言</button>
                             </div>
-                            <button onclick="deleteComment('${docSnap.id}')" class="text-red-400 hover:text-red-600 text-[10px] px-2 py-1 bg-white border border-red-100 rounded shadow-sm shrink-0">刪除</button>
+                            
+                            <!-- 站長回覆區塊 -->
+                            <div class="mt-2 flex gap-2">
+                                <input type="text" id="reply-input-${docSnap.id}" value="${replyValue}" placeholder="輸入站長回覆..." class="flex-grow p-1.5 text-xs rounded border border-slate-200 focus:outline-none focus:border-[#92A8D1]">
+                                <button onclick="replyComment('${docSnap.id}')" class="bg-[#F7CAC9] hover:bg-[#e87a78] text-white px-3 py-1.5 rounded text-xs font-bold transition-colors shadow-sm shrink-0">
+                                    ${replyValue ? '更新回覆' : '回覆'}
+                                </button>
+                            </div>
                         </div>
                     `;
                 });
@@ -283,7 +291,6 @@
             refreshPreview();
         }
 
-        // 檔案拖曳與批次上傳
         window.handleFile = async function(e) { await processFiles(Array.from(e.target.files)); e.target.value = ''; }
         const lyricsArea = document.getElementById('input-lyrics');
         lyricsArea.addEventListener('dragover', (e) => { e.preventDefault(); lyricsArea.classList.add('border-[#92A8D1]', 'bg-blue-50'); });
@@ -341,6 +348,19 @@
         window.deleteSong = async function(id) { if(confirm('確定要刪得這首歌嗎？')) { await deleteDoc(doc(appDb, "songs", id)); showToast('🗑️ 已刪除'); refreshPreview(); } }
         window.clearForm = function() { currentEditingId = null; ['input-title', 'input-video', 'input-start', 'input-lyrics'].forEach(id => document.getElementById(id).value = ''); }
         window.deleteComment = async function(id) { if(confirm('刪除這則留言？')) { await deleteDoc(doc(appDb, "comments", id)); showToast('🗑️ 留言已刪除'); refreshPreview(); } }
+        
+        // 💡 新增：回覆留言的功能
+        window.replyComment = async function(id) {
+            const input = document.getElementById(`reply-input-${id}`);
+            const text = input.value.trim();
+            try {
+                await updateDoc(doc(appDb, "comments", id), { reply: text });
+                showToast('✅ 回覆已更新並發布至前台！');
+                refreshPreview();
+            } catch(e) {
+                showToast('❌ 回覆失敗', true);
+            }
+        }
 
         function renderSongList() {
             const list = document.getElementById('admin-song-list');
